@@ -1,4 +1,4 @@
-import hashlib # hash 함수용 sha256 사용할 라이브러리
+import hashlib
 import json
 from time import time
 import random
@@ -74,7 +74,7 @@ class Blockchain(object):
             current_index += 1
         return True
 
-
+'''Fcution TEST 
 # 1. 객체 생성
 blockchain = Blockchain()
 
@@ -94,4 +94,70 @@ new_block = blockchain.new_block(proof, previous_hash)
 chain = self.chain
 
 print(new_block)
+'''
 
+blockchain = Blockchain()
+my_ip = '0.0.0.0'
+my_port = '5000'
+node_identifier = 'node_'+my_port
+mine_owner = 'master' #지갑 개념
+mine_profit = 0.1 #채굴 보상
+
+
+app = Flask(__name__)
+
+@app.route('/chain', methods=['GET'])
+def full_chain():
+    print("chain info requested!!")
+    response = {
+        'chain' : blockchain.chain, 
+        'length' : len(blockchain.chain), 
+    }
+    return jsonify(response), 200
+
+@app.route('/transactions/new', methods=['POST'])
+def new_transaction():
+    values = request.get_json() 
+    print("transactions_new!!! : ", values)
+    required = ['sender', 'recipient', 'amount'] 
+
+    if not all(k in values for k in required):
+        return 'missing values', 400
+
+    index = blockchain.new_transaction(values['sender'],values['recipient'],
+values['amount'])
+        
+    response = {'message' : 'Transaction will be added to Block {%s}' % index}
+    return jsonify(response), 201
+
+
+@app.route('/mine', methods=['GET'])
+def mine():
+    print("MINING STARTED")    
+    last_block = blockchain.last_block
+    last_proof = last_block['nonce']
+    proof = blockchain.pow(last_proof)  
+
+    blockchain.new_transaction(
+        sender=mine_owner, 
+        recipient=node_identifier, 
+        amount=mine_profit # coinbase transaction 
+    )
+ 
+    previous_hash = blockchain.hash(last_block)
+    block = blockchain.new_block(proof, previous_hash)
+    print("MINING FINISHED")
+
+    response = {
+        'message' : 'new block found',
+        'index' : block['index'],
+        'transactions' : block['transactions'],
+        'nonce' : block['nonce'],
+        'previous_hash' : block['previous_hash']
+    }
+          
+    return jsonify(response), 200
+
+
+if __name__ == '__main__':
+    app.run(host=my_ip, port=my_port)
