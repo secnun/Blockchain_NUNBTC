@@ -18,7 +18,7 @@ print(json.loads(res.content))
 headers = {'Content-Type' : 'application/json; charset=utf-8'}
 data = {
         "sender": "test_from",
-        "recipient": "test_to4",
+        "recipient": "test_to3",
         "amount": 3,
         "smart_contract": {"contract_address":"myaddress"}
 }

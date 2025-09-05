@@ -5,7 +5,8 @@ import random
 import requests
 from flask import Flask, request, jsonify
 import datetime
-
+#해당 파일은 블록체인 블록 객체 초기 형태. 이 파일은 테스트용으로 확인
+#동작시에는 node_{number}로 동작
 
 class Blockchain(object):
 
